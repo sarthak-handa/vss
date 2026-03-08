@@ -2,5 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://vsssalesco.in/sitemap.xml
-
-# Crawl-delay: 1
