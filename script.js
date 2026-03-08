@@ -1,140 +1,161 @@
-// Mobile Navigation Toggle
-const navToggle = document.getElementById('navToggle');
-const navMenu = document.getElementById('navMenu');
+const navToggle = document.getElementById("navToggle");
+const navMenu = document.getElementById("navMenu");
 
 if (navToggle && navMenu) {
-    navToggle.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        
-        // Animate hamburger
-        const spans = navToggle.querySelectorAll('span');
-        if (navMenu.classList.contains('active')) {
-            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-            spans[1].style.opacity = '0';
-            spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
-        } else {
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
-        }
+    navToggle.addEventListener("click", () => {
+        const isOpen = navMenu.classList.toggle("is-open");
+        navToggle.setAttribute("aria-expanded", String(isOpen));
     });
 
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
-            navMenu.classList.remove('active');
-            const spans = navToggle.querySelectorAll('span');
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
+    document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Node)) {
+            return;
+        }
+
+        if (!navMenu.contains(target) && !navToggle.contains(target)) {
+            navMenu.classList.remove("is-open");
+            navToggle.setAttribute("aria-expanded", "false");
         }
     });
+}
 
-    // Close menu when clicking a nav link
-    const navLinks = navMenu.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            navMenu.classList.remove('active');
-            const spans = navToggle.querySelectorAll('span');
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", (event) => {
+        const href = anchor.getAttribute("href");
+        if (!href || href === "#") {
+            return;
+        }
+
+        const target = document.querySelector(href);
+        if (!target) {
+            return;
+        }
+
+        event.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        if (navMenu && navToggle) {
+            navMenu.classList.remove("is-open");
+            navToggle.setAttribute("aria-expanded", "false");
+        }
+    });
+});
+
+const revealItems = document.querySelectorAll(".reveal");
+
+if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+                return;
+            }
+
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+
+    revealItems.forEach((item) => revealObserver.observe(item));
+} else {
+    revealItems.forEach((item) => item.classList.add("is-visible"));
+}
+
+const counters = document.querySelectorAll(".counter");
+
+if (counters.length) {
+    const animateCounter = (element) => {
+        const target = Number(element.dataset.counter || 0);
+        const duration = 1200;
+        const startTime = performance.now();
+
+        const step = (time) => {
+            const progress = Math.min((time - startTime) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const value = Math.round(target * eased);
+            element.textContent = `${value}+`;
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        };
+
+        requestAnimationFrame(step);
+    };
+
+    if ("IntersectionObserver" in window) {
+        const counterObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+
+                animateCounter(entry.target);
+                observer.unobserve(entry.target);
+            });
+        }, { threshold: 0.5 });
+
+        counters.forEach((counter) => counterObserver.observe(counter));
+    } else {
+        counters.forEach(animateCounter);
+    }
+}
+
+const filterButtons = document.querySelectorAll("[data-filter]");
+const caseCards = document.querySelectorAll(".case-card");
+
+filterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+
+        filterButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+
+        caseCards.forEach((card) => {
+            const categories = (card.dataset.category || "").split(" ");
+            const shouldShow = filter === "all" || categories.includes(filter);
+            card.hidden = !shouldShow;
         });
     });
-}
-
-// Smooth scroll for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const href = this.getAttribute('href');
-        if (href !== '#') {
-            e.preventDefault();
-            const target = document.querySelector(href);
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        }
-    });
 });
 
-// Contact Form Handling
-const contactForm = document.getElementById('contactForm');
+const contactForm = document.getElementById("contactForm");
+
 if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Get form values
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData);
-        
-        // Simple validation
-        if (!data.name || !data.email || !data.message) {
-            alert('Please fill in all required fields.');
+    const status = document.getElementById("formStatus");
+
+    contactForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(contactForm);
+        const data = Object.fromEntries(formData.entries());
+        const requiredFields = ["name", "email", "phone", "service", "siteType", "message"];
+
+        const hasMissingField = requiredFields.some((field) => !String(data[field] || "").trim());
+
+        if (hasMissingField) {
+            if (status) {
+                status.textContent = "Complete all required fields before sending the brief.";
+            }
             return;
         }
-        
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(data.email)) {
-            alert('Please enter a valid email address.');
-            return;
+
+        const message = [
+            "New VSS Salesco inquiry",
+            `Name: ${data.name}`,
+            `Email: ${data.email}`,
+            `Phone: ${data.phone}`,
+            `Service: ${data.service}`,
+            `Site Type: ${data.siteType}`,
+            `Project Brief: ${data.message}`
+        ].join("\n");
+
+        const whatsappUrl = `https://wa.me/919990696111?text=${encodeURIComponent(message)}`;
+
+        if (status) {
+            status.textContent = "Opening WhatsApp with your project brief.";
         }
-        
-        // Simulate form submission (in production, integrate with backend)
-        alert(`Thank you, ${data.name}! We have received your inquiry about ${data.service || 'our services'}. We will contact you at ${data.email} shortly.`);
-        
-        // Reset form
-        this.reset();
+
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     });
 }
-
-// Header scroll effect
-const header = document.querySelector('.header');
-let lastScroll = 0;
-
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-    
-    if (currentScroll > 100) {
-        header.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
-    } else {
-        header.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
-    }
-    
-    lastScroll = currentScroll;
-});
-
-// Add animation on scroll for elements
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
-    });
-}, observerOptions);
-
-// Observe service cards and feature items
-document.querySelectorAll('.service-card, .product-card, .feature-item, .process-step').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(el);
-});
-
-// Active nav link highlighting based on current page
-const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-document.querySelectorAll('.nav-link').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href === currentPage) {
-        link.classList.add('active');
-    }
-});
