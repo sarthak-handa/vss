@@ -445,7 +445,11 @@ h1 {
 .services-section,
 .testimonial-section,
 .process-section,
-.cta-section {
+.cta-section,
+.credentials-section,
+.why-section,
+.problem-solution-section,
+.map-section {
     padding: 100px 0;
 }
 
@@ -520,12 +524,40 @@ h1 {
 .stack-card,
 .contact-details-panel,
 .contact-form-panel,
-.promise-card {
+.promise-card,
+.credential-card {
     background: rgba(255, 255, 255, 0.84);
     border: 1px solid rgba(15, 23, 42, 0.06);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     padding: 28px;
+}
+
+.credentials-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.badge-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.badge-grid span {
+    background: #12203a;
+    border-radius: 999px;
+    color: rgba(241, 245, 249, 0.92);
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 12px 14px;
+}
+
+.panel-copy {
+    color: var(--muted-dark);
+    margin: 14px 0 22px;
 }
 
 .stat-card strong {
@@ -740,6 +772,23 @@ h1 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.area-grid {
+    justify-content: center;
+}
+
+.map-frame {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.map-frame iframe {
+    border: 0;
+    display: block;
+    height: 420px;
+    width: 100%;
+}
+
 .channel-card {
     color: inherit;
 }
@@ -874,6 +923,7 @@ h1 {
     .section-heading,
     .trust-strip-inner,
     .outcome-grid,
+    .credentials-grid,
     .footer-grid {
         grid-template-columns: 1fr;
     }
@@ -956,7 +1006,8 @@ h1 {
     .testimonial-grid,
     .feature-grid,
     .timeline-grid,
-    .form-grid {
+    .form-grid,
+    .credentials-grid {
         grid-template-columns: 1fr;
     }
 
